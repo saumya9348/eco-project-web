@@ -98,8 +98,16 @@ export const verifyPayment = async (req, res) => {
 
     // get payment from db
     const payment = await paymentModel.findOne({razorPayOrderID:payload.order_id})
+
+    if (payment.status != "captured" && eventStatus == "payment.captured") {
+        const updateStatus = await payment.updateOne({_id:payment._id},{$set:{
+            status:"Processing"
+        }})
+        console.log(updateStatus)
+    }
+
+
     console.log("paym,ent",payment)
-    console.log("Entity - > \n"+ req.body.payload.payment.entity.id)
     
     res.status(200).send("ok")
 }
