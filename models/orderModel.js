@@ -16,11 +16,15 @@ const orderSchema = new mongoose.Schema(
       type: mongoose.ObjectId,
       ref: "users",
     },
-    cartValue:[],
+    cartValue: [],
     status: {
       type: String,
       default: "Not Process",
       enum: ["Not Process", "Processing", "Shipped", "deliverd", "cancel", "failed"],
+    },
+    total: {
+      type: Number,
+      required: true,
     },
   },
   { timestamps: true }

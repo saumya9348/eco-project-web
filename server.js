@@ -14,7 +14,7 @@ import { requireSignIn } from "./middlewares/authMiddleware.js";
 import {
   verifyPayment
 } from "./controllers/payment.js";
-
+import { otpRequest } from "./controllers/authController.js";
 //configure env
 dotenv.config();
 
@@ -37,18 +37,19 @@ app.use("/api/v1/category", categoryRoutes);
 app.use("/api/v1/product", productRoutes);
 app.use("/api/v1/payment",requireSignIn,paymentRoutes)
 app.post("/razorpay/webhook/payment",verifyPayment)
+app.post("/mail",otpRequest)
 
 //rest api
 
-app.use(express.static(path.join(__dirname, "./client/build")));
-app.get("*", function (_, res) {
-  res.sendFile(
-    path.join(__dirname, "./client/build/index.html"),
-    function (err) {
-      res.status(500).send(err);
-    }
-  );
-});
+// app.use(express.static(path.join(__dirname, "./client/build")));
+// app.get("*", function (_, res) {
+//   res.sendFile(
+//     path.join(__dirname, "./client/build/index.html"),
+//     function (err) {
+//       res.status(500).send(err);
+//     }
+//   );
+// });
 
 //PORT
 const PORT = process.env.PORT || 8081;
