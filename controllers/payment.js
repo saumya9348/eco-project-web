@@ -2,6 +2,7 @@ import Razorpay from 'razorpay'
 import cartModel from "../models/cart.js";
 import orderModel from "../models/orderModel.js";
 import paymentModel from "../models/payment.js"
+import dbConn from "../config/db.js"
 
 const instance = new Razorpay({
     key_id: 'rzp_test_ZPdbuLOnpwMBtq',
@@ -89,9 +90,17 @@ export const capturePayment = async (req, res) => {
 
 
 export const verifyPayment = async (req, res) => {
-    console.log(" \n verify payment \n","\n reqbody - "+req.body+"\n ")
+    console.log(" \n verify payment webhook started \n")
     console.log(req.body)
+
+    let eventStatus = req.body.event
+    let payload = req.body.payload.payment.entity
+
+    console.log("orderid",payload.notes[0])
+    // get payment from db
+    const payment = await paymentModel.findById(payload.notes.orderID)
+    console.log("paym,ent",payment)
     console.log("Entity - > \n"+ req.body.payload.payment.entity.id)
-    console.log("Entity - > \n"+ req.body.payload.payment.entity[0].id)
+    
     res.status(200).send("ok")
 }
