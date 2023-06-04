@@ -90,5 +90,7 @@ export const capturePayment = async (req, res) => {
 
 export const verifyPayment = async (req, res) => {
     console.log(" \n verify payment \n","\n reqbody - "+req.body+"\n ")
+    console.log(req.body)
+    console.log(req)
     res.status(200).send("ok")
 }
