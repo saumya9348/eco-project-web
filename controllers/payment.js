@@ -101,7 +101,7 @@ export const verifyPayment = async (req, res) => {
 
     if (payment.status != "captured" && eventStatus == "payment.captured") {
         let paymentUpdate = await paymentModel.findByIdAndUpdate(payment._id,{status:"captured"})
-        let orderUpdate = await orderModel.findByIdAndUpdate(payment._id,{status:"Processing",payment:true})
+        let orderUpdate = await orderModel.findByIdAndUpdate(payment.systemOrderID,{status:"Processing",payment:true})
         console.log("captured"+paymentUpdate,"\n order update \n",orderUpdate)
         res.status(200).send("ok")
     }else if (payment.status != "captured" && eventStatus == "payment.failed") {
