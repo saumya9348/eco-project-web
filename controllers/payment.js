@@ -102,7 +102,8 @@ export const verifyPayment = async (req, res) => {
     const userDetails = await userModel.findById(payment.userID)
     let userName = userDetails.name.toLowerCase()
     userName = userName[0].toUpperCase() + userName.slice(1)
-
+console.log("username",userName)
+console.log(userDetails)
     if (payment.status != "captured" && eventStatus == "payment.captured") {
         let paymentUpdate = await paymentModel.findByIdAndUpdate(payment._id,{status:"captured"})
         let orderUpdate = await orderModel.findByIdAndUpdate(payment.systemOrderID,{status:"Processing",payment:true})
@@ -112,7 +113,7 @@ export const verifyPayment = async (req, res) => {
         await sendMail(userDetails.email,"SamKart Order Placed",msg)
         await sendMessage(userDetails.phone,msg)
         console.log("captured"+paymentUpdate,"\n order update \n",orderUpdate)
-        res.status(200).send("ok")
+        return res.status(200).send("ok")
     }else if (payment.status != "captured" && eventStatus == "payment.failed") {
         let paymentUpdate = await paymentModel.findByIdAndUpdate(payment._id,{status:"failed"})
         let msg = `Hi,${userName} your payment has failed for SamKart order. If any money deducted from your account will be refunded with in 3-4 days.\n
@@ -120,8 +121,7 @@ export const verifyPayment = async (req, res) => {
         await sendMail(userDetails.email,"SamKart Order Failed",msg)
         await sendMessage(userDetails.phone,msg)
         console.log("failed"+paymentUpdate)
-
+        return res.status(404).send("failed")
     }
 
-    res.status(200).send("ok")
 }
