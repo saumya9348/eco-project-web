@@ -123,7 +123,7 @@ export const loginController = async (req, res) => {
 export const otpRequest = async (req,res) => {
   const {email} = req.body
   if (email == "" || email == undefined){
-    res.status(400).send({ message: "Emai is required" });
+    res.status(400).send({ message: "Email is required" });
   }
 
   let user = await userModel.findOne({email:email})

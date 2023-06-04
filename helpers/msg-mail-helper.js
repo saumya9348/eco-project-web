@@ -23,6 +23,7 @@ export const sendMessage = async (phno, message) => {
   }
 }
 export const sendMail = async (to, subject, text) => {
+  console.log("mail service triggered",process.env.SEND_GRID_MAIL,"\n",process.env.SEND_MAIL === 'true')
  if (process.env.SEND_MAIL === 'true') {
     // create reusable transporter object using the default SMTP transport
     sgMail.setApiKey(process.env.SEND_GRID_MAIL)
