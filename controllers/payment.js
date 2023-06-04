@@ -96,9 +96,8 @@ export const verifyPayment = async (req, res) => {
     let eventStatus = req.body.event
     let payload = req.body.payload.payment.entity
 
-    console.log("orderid",payload.notes[0])
     // get payment from db
-    const payment = await paymentModel.findById(payload.notes.orderID)
+    const payment = await paymentModel.findOne({razorPayOrderID:payload.order_id})
     console.log("paym,ent",payment)
     console.log("Entity - > \n"+ req.body.payload.payment.entity.id)
     
