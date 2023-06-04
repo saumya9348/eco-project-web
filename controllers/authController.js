@@ -2,7 +2,9 @@ import userModel from "../models/userModel.js";
 import orderModel from "../models/orderModel.js";
 
 import { comparePassword, hashPassword } from "./../helpers/authHelper.js";
+import { sendMessage, sendMail} from "../helpers/msg-mail-helper.js";
 import JWT from "jsonwebtoken";
+import otpManage from "../models/otpManage.js";
 
 export const registerController = async (req, res) => {
   try {
@@ -117,27 +119,48 @@ export const loginController = async (req, res) => {
 
 //forgotPasswordController
 
+
+export const otpRequest = async (req,res) => {
+  const {email} = req.body
+  if (email == "" || email == undefined){
+    res.status(400).send({ message: "Emai is required" });
+  }
+
+  let user = await userModel.findOne({email:email})
+  console.log(user)
+  // 6 digit otp
+  const otpNum = Math.floor(100000 + Math.random() * 900000)
+  let otpCreated = await otpManage.create({ otp: otpNum, userID: user._id, phone: user.phone,emailID:user.email })
+  let msg = `Your otp is ${otpNum} \n Don't share to anyone \n SamKart`  
+  await sendMail(email,"SamKart Forget Password Otp",msg)
+  await sendMessage(user.phone,msg)
+  res.status(200).send({ message: "Otp Sent successfully" });
+}
+
+
 export const forgotPasswordController = async (req, res) => {
   try {
-    const { email, answer, newPassword } = req.body;
+    const { email,otp, newPassword } = req.body;
     if (!email) {
       res.status(400).send({ message: "Emai is required" });
-    }
-    if (!answer) {
-      res.status(400).send({ message: "answer is required" });
     }
     if (!newPassword) {
       res.status(400).send({ message: "New Password is required" });
     }
+    if (!otp) {
+      res.status(400).send({ message: "Otp is required" });
+    }
     //check
-    const user = await userModel.findOne({ email, answer });
+    const user = await userModel.findOne({ email });
+    const lastOtp = await otpManage.findOne({emailID:email,otp:otp}).sort({createdAt:-1})
     //validation
-    if (!user) {
+    if (!user || !lastOtp)  {
       return res.status(404).send({
         success: false,
-        message: "Wrong Email Or Answer",
+        message: "Wrong Email Or Otp",
       });
     }
+
     const hashed = await hashPassword(newPassword);
     await userModel.findByIdAndUpdate(user._id, { password: hashed });
     res.status(200).send({

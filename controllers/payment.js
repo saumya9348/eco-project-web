@@ -2,8 +2,8 @@ import Razorpay from 'razorpay'
 import cartModel from "../models/cart.js";
 import orderModel from "../models/orderModel.js";
 import paymentModel from "../models/payment.js"
-import dbConn from "../config/db.js"
-
+import { sendMail,sendMessage } from '../helpers/msg-mail-helper.js';
+import userModel from '../models/userModel.js';
 const instance = new Razorpay({
     key_id: 'rzp_test_ZPdbuLOnpwMBtq',
     key_secret: '4VURb7xZBPtjG0kMxGw0V1fy',
@@ -58,6 +58,7 @@ export const createPayment = async (req, res) => {
         products:productIDs,
         buyer:req.user._id,
         cartValue:resp,
+        total:totalAmount,
     })
    console.log(resp,orderResp)
 
@@ -98,22 +99,29 @@ export const verifyPayment = async (req, res) => {
 
     // get payment from db
     const payment = await paymentModel.findOne({razorPayOrderID:payload.order_id})
+    const userDetails = await userModel.findById(payment.userID)
+    let userName = userDetails.name.toLowerCase()
+    userName = userName[0].toUpperCase() + userName.slice(1)
 
     if (payment.status != "captured" && eventStatus == "payment.captured") {
         let paymentUpdate = await paymentModel.findByIdAndUpdate(payment._id,{status:"captured"})
         let orderUpdate = await orderModel.findByIdAndUpdate(payment.systemOrderID,{status:"Processing",payment:true})
+        let msg = `Hi,${userName} we received your order, your order is on processing state. \n your total cart amount was - ${payment.amount}.\n
+        Thanks for purchasing from SamKart.
+        `
+        await sendMail(email,"SamKart Order Placed",msg)
+        await sendMessage(user.phone,msg)
         console.log("captured"+paymentUpdate,"\n order update \n",orderUpdate)
         res.status(200).send("ok")
     }else if (payment.status != "captured" && eventStatus == "payment.failed") {
         let paymentUpdate = await paymentModel.findByIdAndUpdate(payment._id,{status:"failed"})
+        let msg = `Hi,${userName} your payment has failed for SamKart order. If any money deducted from your account will be refunded with in 3-4 days.\n
+        for more information contact us`
+        await sendMail(email,"SamKart Order Placed",msg)
+        await sendMessage(user.phone,msg)
         console.log("failed"+paymentUpdate)
 
     }
 
-
-
-
-    console.log("paym,ent",payment)
-    
     res.status(200).send("ok")
 }
