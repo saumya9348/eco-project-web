@@ -109,16 +109,16 @@ export const verifyPayment = async (req, res) => {
         let msg = `Hi,${userName} we received your order, your order is on processing state. \n your total cart amount was - ${payment.amount}.\n
         Thanks for purchasing from SamKart.
         `
-        await sendMail(email,"SamKart Order Placed",msg)
-        await sendMessage(user.phone,msg)
+        await sendMail(userDetails.email,"SamKart Order Placed",msg)
+        await sendMessage(userDetails.phone,msg)
         console.log("captured"+paymentUpdate,"\n order update \n",orderUpdate)
         res.status(200).send("ok")
     }else if (payment.status != "captured" && eventStatus == "payment.failed") {
         let paymentUpdate = await paymentModel.findByIdAndUpdate(payment._id,{status:"failed"})
         let msg = `Hi,${userName} your payment has failed for SamKart order. If any money deducted from your account will be refunded with in 3-4 days.\n
         for more information contact us`
-        await sendMail(email,"SamKart Order Placed",msg)
-        await sendMessage(user.phone,msg)
+        await sendMail(userDetails.email,"SamKart Order Failed",msg)
+        await sendMessage(userDetails.phone,msg)
         console.log("failed"+paymentUpdate)
 
     }
